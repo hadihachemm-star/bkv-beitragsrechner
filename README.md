@@ -1,5 +1,7 @@
 # bKV-Beitragsrechner
 
+[![Tests](https://github.com/hadihachemm-star/bkv-beitragsrechner/actions/workflows/tests.yml/badge.svg)](https://github.com/hadihachemm-star/bkv-beitragsrechner/actions/workflows/tests.yml)
+
 Kleiner Rechner für die betriebliche Krankenversicherung (bKV) mit Budgettarif.
 Er zeigt einem Betrieb in Sekunden, was eine bKV pro Monat und Jahr kostet und
 wie sie im Vergleich zu einer gleich hohen Brutto-Gehaltserhöhung dasteht.
