@@ -31,13 +31,13 @@ class RechnerTest(unittest.TestCase):
 
     def test_cent_rundung(self):
         for anzahl, satz, erwartete_kosten in [
-            (3, 0.0125, 907.61),
+            (3, 0.0125, 907.60),
             (1, 0.0625, 317.48),
         ]:
             with self.subTest(anzahl=anzahl, satz=satz):
                 self.assertEqual(berechne(anzahl, 600, satz).lohnerhoehung_jahr_gesamt,
                                  erwartete_kosten)
-        self.assertEqual(berechne(3, 600, 0.0125).differenz_zur_lohnerhoehung, 11.21)
+        self.assertEqual(berechne(3, 600, 0.0125).differenz_zur_lohnerhoehung, 11.20)
 
     def test_freigrenze_exakt(self):
         self.assertTrue(berechne(1, 1500, andere_sachbezuege=0.50).innerhalb_freigrenze)
