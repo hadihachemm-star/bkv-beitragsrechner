@@ -4,21 +4,22 @@ Rechnet fuer einen Betrieb aus, was eine betriebliche Krankenversicherung
 (bKV) mit Budgettarif pro Monat und Jahr kostet, und stellt das einer
 gleich hohen Brutto-Gehaltserhoehung gegenueber.
 
-Alle Beitraege in BEISPIELTARIFE sind frei erfunden und dienen nur der
-Veranschaulichung. Sie sind kein Angebot und kein Tarif eines Versicherers.
+Die Beitraege in BEISPIELTARIFE sind gerundete Beispielwerte, die sich an
+der Spanne oeffentlich genannter Marktbeitraege orientieren (Stand 11/2026).
+Sie sind kein Angebot und kein Tarif eines Versicherers.
 """
 from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
 
-# Jahresbudget je Mitarbeiter in Euro -> erfundener Monatsbeitrag in Euro
+# Jahresbudget je Mitarbeiter in Euro -> Beispiel-Monatsbeitrag in Euro
 BEISPIELTARIFE: dict[int, float] = {
-    300: 9.90,
-    600: 19.90,
-    900: 29.90,
-    1200: 39.90,
-    1500: 49.90,
+    300: 12.90,
+    600: 24.90,
+    900: 33.90,
+    1200: 42.90,
+    1500: 49.50,
 }
 
 # Monatliche Freigrenze fuer Sachbezuege (§ 8 Abs. 2 Satz 11 EStG).

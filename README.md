@@ -6,9 +6,10 @@ Kleiner Rechner für die betriebliche Krankenversicherung (bKV) mit Budgettarif.
 Er zeigt einem Betrieb in Sekunden, was eine bKV pro Monat und Jahr kostet und
 wie sie im Vergleich zu einer gleich hohen Brutto-Gehaltserhöhung dasteht.
 
-> **Hinweis:** Alle Beiträge in diesem Projekt sind frei erfundene Beispielwerte.
-> Sie sind kein Angebot, kein Tarif eines Versicherers und keine Steuer- oder
-> Rechtsberatung.
+> **Hinweis:** Alle Beiträge in diesem Projekt sind gerundete Beispielwerte. Sie
+> orientieren sich an der Spanne öffentlich genannter Marktbeiträge (Stand
+> 11/2026), sind aber kein Angebot, kein Tarif eines Versicherers und keine
+> Steuer- oder Rechtsberatung.
 
 ## Was der Rechner macht
 
@@ -26,12 +27,12 @@ python rechner.py 25 600
 
 ```text
 bKV-Budgettarif 600 EUR Jahresbudget, 25 Mitarbeiter
-  Beitrag je Mitarbeiter/Monat : 19,90 EUR
-  Arbeitgeberkosten/Monat      : 497,50 EUR
-  Arbeitgeberkosten/Jahr       : 5.970,00 EUR
+  Beitrag je Mitarbeiter/Monat : 24,90 EUR
+  Arbeitgeberkosten/Monat      : 622,50 EUR
+  Arbeitgeberkosten/Jahr       : 7.470,00 EUR
   Innerhalb 50-EUR-Freigrenze  : ja
-  Gleich hohe Lohnerhoehung/Jahr (inkl. AG-Anteil): 7.223,70 EUR
-  Mehrkosten der Lohnerhoehung : 1.253,70 EUR
+  Gleich hohe Lohnerhoehung/Jahr (inkl. AG-Anteil): 9.038,70 EUR
+  Mehrkosten der Lohnerhoehung : 1.568,70 EUR
 ```
 
 Optionen:
@@ -43,7 +44,8 @@ Optionen:
 
 ## Annahmen und Grenzen
 
-- Budgetstufen und Beiträge stehen in `BEISPIELTARIFE` und sind erfunden.
+- Budgetstufen und Beiträge stehen in `BEISPIELTARIFE` und sind Beispielwerte.
+  Echte Beiträge unterscheiden sich je nach Versicherer, Tarif und Leistungsumfang.
 - Der Lohnvergleich ist bewusst vereinfacht: Er rechnet nur den
   Arbeitgeberanteil auf den Bruttobetrag und betrachtet nicht, was beim
   Mitarbeiter netto ankommt.

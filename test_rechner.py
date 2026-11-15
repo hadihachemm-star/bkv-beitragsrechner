@@ -6,10 +6,10 @@ from rechner import berechne, euro
 class RechnerTest(unittest.TestCase):
     def test_kosten(self):
         e = berechne(25, 600)
-        self.assertEqual(e.monat_gesamt, 497.50)
-        self.assertEqual(e.jahr_gesamt, 5970.00)
-        self.assertEqual(e.lohnerhoehung_jahr_gesamt, 7223.70)
-        self.assertEqual(e.differenz_zur_lohnerhoehung, 1253.70)
+        self.assertEqual(e.monat_gesamt, 622.50)
+        self.assertEqual(e.jahr_gesamt, 7470.00)
+        self.assertEqual(e.lohnerhoehung_jahr_gesamt, 9038.70)
+        self.assertEqual(e.differenz_zur_lohnerhoehung, 1568.70)
 
     def test_freigrenze(self):
         self.assertTrue(berechne(10, 1500).innerhalb_freigrenze)
