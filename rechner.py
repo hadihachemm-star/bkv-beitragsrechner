@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, localcontext
+from sys import float_info
 
 # Jahresbudget je Mitarbeiter in Euro -> Beispiel-Monatsbeitrag in Euro
 BEISPIELTARIFE: dict[int, float] = {
@@ -28,6 +30,7 @@ SACHBEZUGSFREIGRENZE = 50.00
 
 # Vereinfachte Annahme: Arbeitgeberanteil zur Sozialversicherung auf Bruttolohn.
 AG_NEBENKOSTEN_STANDARD = 0.21
+CENT = Decimal("0.01")
 
 
 @dataclass(frozen=True)
@@ -43,32 +46,69 @@ class Ergebnis:
     @property
     def differenz_zur_lohnerhoehung(self) -> float:
         """Mehrkosten einer gleich hohen Brutto-Lohnerhoehung pro Jahr."""
-        return round(self.lohnerhoehung_jahr_gesamt - self.jahr_gesamt, 2)
+        jahr = Decimal(f"{self.jahr_gesamt:.2f}")
+        lohn = Decimal(f"{self.lohnerhoehung_jahr_gesamt:.2f}")
+        with localcontext(Context(prec=float_info.max_10_exp + 4)):
+            return float(lohn - jahr)
+
+
+def _dezimal_argument(text: str) -> Decimal:
+    try:
+        return Decimal(text)
+    except InvalidOperation as fehler:
+        raise argparse.ArgumentTypeError("Ungueltige Dezimalzahl.") from fehler
+
+
+def _dezimalzahl(wert: float | Decimal, feld: str) -> Decimal:
+    if isinstance(wert, (int, float, Decimal)) and not isinstance(wert, bool):
+        zahl = Decimal(str(wert)) if isinstance(wert, float) else Decimal(wert)
+        if zahl.is_finite():
+            return zahl
+    raise ValueError(f"{feld} muss eine endliche Zahl sein.")
+
+
+def _euro_float(betrag: Decimal) -> float:
+    wert = float(betrag)
+    if Decimal(f"{wert:.2f}") != betrag:
+        raise ValueError("Der Betrag ist ausserhalb des darstellbaren Cent-Bereichs.")
+    return wert
 
 
 def berechne(
     mitarbeiter: int,
     budget: int,
-    ag_nebenkosten: float = AG_NEBENKOSTEN_STANDARD,
-    andere_sachbezuege: float = 0.0,
+    ag_nebenkosten: float | Decimal = AG_NEBENKOSTEN_STANDARD,
+    andere_sachbezuege: float | Decimal = 0.0,
 ) -> Ergebnis:
     """Berechnet die Arbeitgeberkosten fuer einen Budgettarif."""
-    if mitarbeiter < 1:
-        raise ValueError("Es wird mindestens ein Mitarbeiter benoetigt.")
-    if budget not in BEISPIELTARIFE:
+    if isinstance(mitarbeiter, bool) or not isinstance(mitarbeiter, int) or mitarbeiter < 1:
+        raise ValueError("Die Mitarbeiterzahl muss eine positive Ganzzahl sein.")
+    if isinstance(budget, bool) or not isinstance(budget, int) or budget not in BEISPIELTARIFE:
         stufen = ", ".join(str(b) for b in sorted(BEISPIELTARIFE))
         raise ValueError(f"Unbekannte Budgetstufe {budget}. Moeglich: {stufen}")
-    if not 0 <= ag_nebenkosten < 1:
+    if mitarbeiter > int(float_info.max):
+        raise ValueError("Die Mitarbeiterzahl ist ausserhalb des darstellbaren Bereichs.")
+
+    ag_satz = _dezimalzahl(ag_nebenkosten, "ag_nebenkosten")
+    sachbezuege = _dezimalzahl(andere_sachbezuege, "andere_sachbezuege")
+    if not 0 <= ag_satz < 1:
         raise ValueError("ag_nebenkosten muss zwischen 0 und 1 liegen.")
-    if andere_sachbezuege < 0:
+    if sachbezuege < 0:
         raise ValueError("andere_sachbezuege darf nicht negativ sein.")
 
-    beitrag = BEISPIELTARIFE[budget]
-    monat = round(beitrag * mitarbeiter, 2)
-    jahr = round(monat * 12, 2)
-    lohn = round(jahr * (1 + ag_nebenkosten), 2)
-    frei = beitrag + andere_sachbezuege <= SACHBEZUGSFREIGRENZE
-    return Ergebnis(mitarbeiter, budget, beitrag, monat, jahr, frei, lohn)
+    beitrag = Decimal(str(BEISPIELTARIFE[budget]))
+    # Reserve enough significant digits for the count, tariff and rate.
+    # A tiny rate may round away far below the cent without changing the result.
+    praezision = len(str(mitarbeiter)) + len(ag_satz.as_tuple().digits) + 10
+    with localcontext(Context(prec=max(28, praezision), rounding=ROUND_HALF_EVEN)):
+        monat = beitrag * mitarbeiter
+        jahr = monat * 12
+        lohn = (jahr + jahr * ag_satz).quantize(CENT)
+        frei = sachbezuege <= Decimal(str(SACHBEZUGSFREIGRENZE)) - beitrag
+        # The derived difference must also survive the public float interface.
+        _euro_float(lohn - jahr)
+        return Ergebnis(mitarbeiter, budget, float(beitrag), _euro_float(monat),
+                        _euro_float(jahr), frei, _euro_float(lohn))
 
 
 def euro(wert: float) -> str:
@@ -100,9 +140,9 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="bKV-Beitragsrechner (Beispielwerte)")
     p.add_argument("mitarbeiter", type=int, help="Anzahl versicherter Mitarbeiter")
     p.add_argument("budget", type=int, help="Jahresbudget je Mitarbeiter in EUR")
-    p.add_argument("--ag-nebenkosten", type=float, default=AG_NEBENKOSTEN_STANDARD,
+    p.add_argument("--ag-nebenkosten", type=_dezimal_argument, default=AG_NEBENKOSTEN_STANDARD,
                    help="Arbeitgeberanteil Sozialversicherung, z. B. 0.21")
-    p.add_argument("--andere-sachbezuege", type=float, default=0.0,
+    p.add_argument("--andere-sachbezuege", type=_dezimal_argument, default=0.0,
                    help="Weitere Sachbezuege je Mitarbeiter/Monat in EUR")
     a = p.parse_args(argv)
     try:
