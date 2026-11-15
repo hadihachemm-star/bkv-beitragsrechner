@@ -2,6 +2,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from decimal import Decimal
 from io import StringIO
 import unittest
+from unittest.mock import patch
 
 from rechner import berechne, euro, main
 
@@ -29,6 +30,7 @@ class RechnerTest(unittest.TestCase):
     def test_format(self):
         self.assertEqual(euro(5970), "5.970,00 EUR")
 
+    @patch.dict("rechner.BEISPIELTARIFE", {600: 24.90})
     def test_cent_rundung(self):
         for anzahl, satz, erwartete_kosten in [
             (3, 0.0125, 907.60),
@@ -39,6 +41,7 @@ class RechnerTest(unittest.TestCase):
                                  erwartete_kosten)
         self.assertEqual(berechne(3, 600, 0.0125).differenz_zur_lohnerhoehung, 11.20)
 
+    @patch.dict("rechner.BEISPIELTARIFE", {1500: 49.50})
     def test_freigrenze_exakt(self):
         self.assertTrue(berechne(1, 1500, andere_sachbezuege=0.50).innerhalb_freigrenze)
         for betrag in (0.51, Decimal("0.50000000000000000001")):
