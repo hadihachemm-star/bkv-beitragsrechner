@@ -31,23 +31,23 @@ class RechnerTest(unittest.TestCase):
 
     def test_cent_rundung(self):
         for anzahl, satz, erwartete_kosten in [
-            (3, 0.0125, 725.36),
-            (1, 0.0625, 253.72),
+            (3, 0.0125, 907.61),
+            (1, 0.0625, 317.48),
         ]:
             with self.subTest(anzahl=anzahl, satz=satz):
                 self.assertEqual(berechne(anzahl, 600, satz).lohnerhoehung_jahr_gesamt,
                                  erwartete_kosten)
-        self.assertEqual(berechne(3, 600, 0.0125).differenz_zur_lohnerhoehung, 8.96)
+        self.assertEqual(berechne(3, 600, 0.0125).differenz_zur_lohnerhoehung, 11.21)
 
     def test_freigrenze_exakt(self):
-        self.assertTrue(berechne(1, 1500, andere_sachbezuege=0.10).innerhalb_freigrenze)
-        for betrag in (0.11, Decimal("0.10000000000000000001")):
+        self.assertTrue(berechne(1, 1500, andere_sachbezuege=0.50).innerhalb_freigrenze)
+        for betrag in (0.51, Decimal("0.50000000000000000001")):
             with self.subTest(betrag=betrag):
                 self.assertFalse(berechne(1, 1500, andere_sachbezuege=betrag).innerhalb_freigrenze)
         stdout = StringIO()
         with redirect_stdout(stdout):
             self.assertEqual(main(["1", "1500", "--andere-sachbezuege",
-                                   "0.10000000000000000001"]), 0)
+                                   "0.50000000000000000001"]), 0)
         self.assertIn("nein - steuerliche Behandlung pruefen", stdout.getvalue())
 
     def test_ungueltige_zahleneingaben(self):
